@@ -1,0 +1,5 @@
+{
+  "name": "Moodle Tutorbot",
+  "description": "A personalized chatbot for Moodle that uses student survey answers and course materials as memories to provide tailored academic support. The bot offers a personalized learning experience by adapting its responses based on the user's individual background and progress.",
+  "requestFramePermissions": []
+}
