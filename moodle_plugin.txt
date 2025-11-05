@@ -1,0 +1,6 @@
+plugin=mod_tutorbot
+url=https://github.com/Rhovasti/Moodle-tutorbot
+version=2025110500
+requires=2024100600
+maturity=stable
+release=1.0.0
