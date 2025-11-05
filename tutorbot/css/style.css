@@ -1,0 +1,290 @@
+/* AI Tutorbot Plugin Styles */
+.tutorbot-container {
+    min-height: 600px;
+    font-family: var(--fontFamilySansSerif);
+}
+
+.tutorbot-chat-interface {
+    display: flex;
+    height: 600px;
+    background-color: var(--bgColor);
+    color: var(--textColor);
+}
+
+.tutorbot-sidebar {
+    flex: 0 0 33.333%;
+    background-color: var(--cardBg);
+    border-right: 1px solid var(--borderColor);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.tutorbot-sidebar.collapsed {
+    flex: 0 0 48px;
+}
+
+.tutorbot-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.tutorbot-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--borderColor);
+    background-color: var(--cardBg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tutorbot-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--headingColor);
+}
+
+.tutorbot-welcome {
+    padding: 1rem;
+    background-color: var(--infoBg);
+    border: 1px solid var(--infoBorder);
+    border-radius: var(--borderRadius);
+    margin: 1rem;
+}
+
+.tutorbot-sidebar-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--borderColor);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tutorbot-sidebar-content {
+    padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.tutorbot-sidebar-content.hidden {
+    display: none;
+}
+
+.tutorbot-textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: 0.75rem;
+    border: 2px solid var(--inputBorder);
+    border-radius: var(--borderRadius);
+    background-color: var(--inputBg);
+    color: var(--inputText);
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 1rem;
+}
+
+.tutorbot-textarea:focus {
+    outline: none;
+    border-color: var(--primaryColor);
+    box-shadow: 0 0 0 2px rgba(var(--primaryColorRGB), 0.2);
+}
+
+.tutorbot-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--borderRadius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tutorbot-button-primary {
+    background-color: var(--primaryColor);
+    color: white;
+}
+
+.tutorbot-button-primary:hover {
+    background-color: var(--primaryColorHover);
+}
+
+.tutorbot-button-secondary {
+    background-color: var(--secondaryColor);
+    color: white;
+}
+
+.tutorbot-button-secondary:hover {
+    background-color: var(--secondaryColorHover);
+}
+
+.tutorbot-chat-messages {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    background-color: var(--bodyBg);
+}
+
+.tutorbot-message {
+    display: flex;
+    margin-bottom: 1.5rem;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.tutorbot-message.user {
+    justify-content: flex-end;
+}
+
+.tutorbot-message-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.875rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.tutorbot-message-avatar.bot {
+    background-color: var(--primaryColor);
+}
+
+.tutorbot-message-avatar.user {
+    background-color: var(--secondaryColor);
+}
+
+.tutorbot-message-content {
+    max-width: 70%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    word-wrap: break-word;
+}
+
+.tutorbot-message.user .tutorbot-message-content {
+    background-color: var(--primaryColor);
+    color: white;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.tutorbot-message.bot .tutorbot-message-content {
+    background-color: var(--cardBg);
+    color: var(--textColor);
+    border: 1px solid var(--borderColor);
+    border-bottom-left-radius: 0.25rem;
+}
+
+.tutorbot-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+}
+
+.tutorbot-loading-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--primaryColor);
+    animation: tutorbot-pulse 1.4s infinite ease-in-out both;
+}
+
+.tutorbot-loading-dot:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.tutorbot-loading-dot:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes tutorbot-pulse {
+    0%, 80%, 100% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.tutorbot-chat-input {
+    padding: 1rem;
+    border-top: 1px solid var(--borderColor);
+    background-color: var(--cardBg);
+}
+
+.tutorbot-input-form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.tutorbot-input-field {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid var(--inputBorder);
+    border-radius: var(--borderRadius);
+    background-color: var(--inputBg);
+    color: var(--inputText);
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.tutorbot-input-field:focus {
+    outline: none;
+    border-color: var(--primaryColor);
+    box-shadow: 0 0 0 2px rgba(var(--primaryColorRGB), 0.2);
+}
+
+.tutorbot-input-field:disabled {
+    background-color: var(--disabledBg);
+    color: var(--disabledText);
+    cursor: not-allowed;
+}
+
+.tutorbot-send-button {
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primaryColor);
+    color: white;
+    border: none;
+    border-radius: var(--borderRadius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tutorbot-send-button:hover:not(:disabled) {
+    background-color: var(--primaryColorHover);
+}
+
+.tutorbot-send-button:disabled {
+    background-color: var(--disabledBg);
+    color: var(--disabledText);
+    cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .tutorbot-chat-interface {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .tutorbot-sidebar {
+        flex: none;
+        border-right: none;
+        border-bottom: 1px solid var(--borderColor);
+    }
+
+    .tutorbot-sidebar.collapsed {
+        flex: none;
+    }
+
+    .tutorbot-message-content {
+        max-width: 85%;
+    }
+}

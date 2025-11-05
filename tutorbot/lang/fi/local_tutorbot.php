@@ -1,0 +1,32 @@
+<?php
+defined('MOODLE_INTERNAL') || die();
+
+$string['pluginname'] = 'Tekoäly Tutorbot';
+$string['pluginname_help'] = 'Personoitu tekoäly-palvelu, joka on integroitu Gemini-tekoälyyn parannettua oppimisen tukea varten.';
+$string['tutorbot:configure'] = 'Määritä tekoäly Tutorbot -asetuksia';
+$string['tutorbot:view'] = 'Käytä tekoäly Tutorbot';
+$string['privacy:metadata'] = 'Tekoäly Tutorbot -laajennus tallentaa käyttäjien keskusteluhistoria ja henkilökohtaisia oppimismuistoja tarjotakseen personoituja opetuskeskusteluja.';
+$string['settings'] = 'Tekoäly Tutorbot -asetukset';
+$string['geminiapikey'] = 'Gemini API -avain';
+$string['geminiapikey_help'] = 'Syötä Google Gemini API -avaimesi. Voit saada sen Google AI Studiosta.';
+$string['enabled'] = 'Käytössä';
+$string['enabled_help'] = 'Ota tekoäly Tutorbot käyttöön tai poista se käytöstä kaikille käyttäjille.';
+$string['maxtokens'] = 'Vastauksen enimmäismerkkien määrä';
+$string['maxtokens_help'] = 'Tekoälyn vastausten enimmäismäärä merkkeinä (oletus: 2000).';
+$string['ratelimit'] = 'Rajoitus (pyyntöä tunnissa)';
+$string['ratelimit_help'] = 'Suurin sallittu pyyntöjen määrä käyttäjää kohden tunnissa väärinkäytösten estämiseksi.';
+$string['welcome'] = 'Tervetuloa tekoäly Tutorbotiin!';
+$string['welcomedesc'] = 'Henkilökohtainen tekoäly-opettajasi on täällä auttamassa sinua oppimisessa. Napsauta alta aloittaaksesi.';
+$string['accessdenied'] = 'Pääsy kielletty';
+$string['notconfigured'] = 'Tekoäly Tutorbot ei ole oikein määritetty. Ota yhteyttä ylläpitäjään.';
+$string['chatinterface'] = 'Keskustelukäyttöliittymä';
+$string['memories'] = 'Oppimismuistisi';
+$string['memories_help'] = 'Lisää kurssimuistiinpanosi, visatulokset ja oppimistavoitteesi tähän, jotta tekoäly-opettajasi voi tarjota personoitua apua.';
+$string['save_memories'] = 'Tallenna muistot';
+$string['startchatting'] = 'Aloita keskustelu';
+$string['sendmessage'] = 'Lähetä viesti';
+$string['typeyourmessage'] = 'Kirjoita viestisi...';
+$string['loading'] = 'Ladataan...';
+$string['error_occurred'] = 'Tapahtui virhe. Yritä uudelleen.';
+$string['chat_title'] = 'Tekoäly Tutorbot - Personoitu oppimisavustaja';
+$string['system_instruction'] = 'Olet personoitu Moodle-kurssin tutorbot. Päätavoitteesi on auttaa opiskelijaa oppimaan ja menestymään kurssillaan.';

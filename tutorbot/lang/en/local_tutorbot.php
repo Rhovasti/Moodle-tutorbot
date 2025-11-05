@@ -1,0 +1,32 @@
+<?php
+defined('MOODLE_INTERNAL') || die();
+
+$string['pluginname'] = 'AI Tutorbot';
+$string['pluginname_help'] = 'Personalized AI tutoring assistant integrated with Gemini AI for enhanced learning support.';
+$string['tutorbot:configure'] = 'Configure AI Tutorbot settings';
+$string['tutorbot:view'] = 'Use AI Tutorbot';
+$string['privacy:metadata'] = 'The AI Tutorbot plugin stores user chat history and personal learning memories to provide personalized tutoring responses.';
+$string['settings'] = 'AI Tutorbot Settings';
+$string['geminiapikey'] = 'Gemini API Key';
+$string['geminiapikey_help'] = 'Enter your Google Gemini API key. You can obtain one from the Google AI Studio.';
+$string['enabled'] = 'Enabled';
+$string['enabled_help'] = 'Enable or disable the AI Tutorbot for all users.';
+$string['maxtokens'] = 'Maximum Response Tokens';
+$string['maxtokens_help'] = 'Maximum number of tokens for AI responses (default: 2000).';
+$string['ratelimit'] = 'Rate Limit (requests per hour)';
+$string['ratelimit_help'] = 'Maximum number of requests allowed per user per hour to prevent abuse.';
+$string['welcome'] = 'Welcome to AI Tutorbot!';
+$string['welcomedesc'] = 'Your personal AI tutor is here to help you learn. Click below to get started.';
+$string['accessdenied'] = 'Access denied';
+$string['notconfigured'] = 'The AI Tutorbot is not properly configured. Please contact your administrator.';
+$string['chatinterface'] = 'Chat Interface';
+$string['memories'] = 'Your Learning Memories';
+$string['memories_help'] = 'Add your course notes, quiz results, and learning goals here to help your AI tutor provide personalized assistance.';
+$string['save_memories'] = 'Save Memories';
+$string['startchatting'] = 'Start Chatting';
+$string['sendmessage'] = 'Send Message';
+$string['typeyourmessage'] = 'Type your message...';
+$string['loading'] = 'Loading...';
+$string['error_occurred'] = 'An error occurred. Please try again.';
+$string['chat_title'] = 'AI Tutorbot - Personalized Learning Assistant';
+$string['system_instruction'] = 'You are a personalized Moodle course tutorbot. Your primary goal is to help a student learn and succeed in their course.';
