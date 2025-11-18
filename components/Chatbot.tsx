@@ -307,7 +307,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
                   type="file"
                   onChange={handleFileUpload}
                   className="hidden"
-                  accept=".pdf,.doc,.docx,.txt"
+                  accept=".pdf,.doc,.docx,.txt,.md"
                   disabled={isUploadingFile}
                 />
                 <button
@@ -321,7 +321,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
                   <p className="mt-2 text-sm text-blue-600 dark:text-blue-400">{uploadProgress}</p>
                 )}
                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  Supported: PDF, DOC, DOCX, TXT (Max 100MB)
+                  Supported: PDF, DOC, DOCX, TXT, MD (Max 100MB)
                 </p>
               </div>
             )}
