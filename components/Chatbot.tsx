@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { Chat } from '@google/genai';
 import useLocalStorage from '../hooks/useLocalStorage';
-import { startChat } from '../services/geminiService';
+import { startChat, enrichMessageWithRAG } from '../services/geminiService';
 import type { User, ChatMessage } from '../types';
 import { MessageAuthor } from '../types';
 
@@ -27,11 +27,12 @@ const UserIcon = ({ username }: { username: string }) => (
 const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
   const [memories, setMemories] = useLocalStorage<string>(`moodle-tutorbot-memories-${user.username}`, '');
   const [chatHistory, setChatHistory] = useLocalStorage<ChatMessage[]>(`moodle-tutorbot-history-${user.username}`, []);
+  const [ragStoreName, setRagStoreName] = useLocalStorage<string | null>(`moodle-tutorbot-rag-store-${user.username}`, null);
   const [tempMemories, setTempMemories] = useState<string>(memories);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showMemories, setShowMemories] = useState(true);
-  
+
   const chatRef = useRef<Chat | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +57,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
     if (!input.trim() || isLoading) return;
 
     const userMessage: ChatMessage = { author: MessageAuthor.USER, text: input };
+    const currentInput = input;
     setChatHistory(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
@@ -65,9 +67,15 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
             chatRef.current = startChat(memories, chatHistory);
         }
 
+        // COMBINED RAG + MEMORIES FIX:
+        // Enrich the user message with RAG context from study materials
+        // If ragStoreName is set, this queries the RAG store and prepends relevant context
+        // The chat already has memories in system instruction, so both work together
+        const enrichedMessage = await enrichMessageWithRAG(currentInput, ragStoreName);
+
         // FIX: sendMessageStream now expects an object with a `message` property.
-        const result = await chatRef.current.sendMessageStream({ message: input });
-        
+        const result = await chatRef.current.sendMessageStream({ message: enrichedMessage });
+
         let modelResponse = '';
         setChatHistory(prev => [...prev, { author: MessageAuthor.MODEL, text: '...' }]);
 
