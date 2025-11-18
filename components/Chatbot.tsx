@@ -84,18 +84,34 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !ragStoreName) return;
+    const originalFile = event.target.files?.[0];
+    if (!originalFile || !ragStoreName) return;
 
     try {
       setIsUploadingFile(true);
-      setUploadProgress(`Uploading ${file.name}...`);
+      setUploadProgress(`Uploading ${originalFile.name}...`);
 
-      await uploadToRagStore(ragStoreName, file);
+      // Fix MIME type for markdown files
+      let fileToUpload = originalFile;
+      const extension = originalFile.name.split('.').pop()?.toLowerCase();
+
+      if (extension === 'md') {
+        // Create new File object with correct MIME type for Markdown
+        fileToUpload = new File([originalFile], originalFile.name, {
+          type: 'text/markdown'
+        });
+      } else if (extension === 'txt' && !originalFile.type) {
+        // Fix text files with missing MIME type
+        fileToUpload = new File([originalFile], originalFile.name, {
+          type: 'text/plain'
+        });
+      }
+
+      await uploadToRagStore(ragStoreName, fileToUpload);
 
       setUploadProgress('');
       setIsUploadingFile(false);
-      alert(`File "${file.name}" uploaded successfully!`);
+      alert(`File "${originalFile.name}" uploaded successfully!`);
 
       // Reset file input
       if (fileInputRef.current) {
