@@ -25,13 +25,11 @@ const UserIcon = ({ username }: { username: string }) => (
 
 
 const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
-  const [memories, setMemories] = useLocalStorage<string>(`moodle-tutorbot-memories-${user.username}`, '');
   const [chatHistory, setChatHistory] = useLocalStorage<ChatMessage[]>(`moodle-tutorbot-history-${user.username}`, []);
   const [ragStoreName, setRagStoreName] = useLocalStorage<string | null>(`moodle-tutorbot-rag-store-${user.username}`, null);
-  const [tempMemories, setTempMemories] = useState<string>(memories);
+  const [memoriesText, setMemoriesText] = useState<string>('');
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showMemories, setShowMemories] = useState(true);
   const [showMaterials, setShowMaterials] = useState(false);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>('');
@@ -42,8 +40,9 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    chatRef.current = startChat(memories, chatHistory);
-  }, [memories, chatHistory]);
+    // Memories are now stored as files in RAG, so pass empty string
+    chatRef.current = startChat('', chatHistory);
+  }, [chatHistory]);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -130,10 +129,35 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
     alert('RAG store selected! Your questions will now use these study materials.');
   };
 
-  const handleSaveMemories = () => {
-    setMemories(tempMemories);
-    setChatHistory([]); // Reset chat history when memories are updated
-    alert('Memories saved! The chat has been reset to apply the new context.');
+  const handleSaveMemories = async () => {
+    if (!memoriesText.trim() || !ragStoreName) {
+      alert('Please enter memories and ensure a collection is selected.');
+      return;
+    }
+
+    try {
+      setIsUploadingFile(true);
+      setUploadProgress('Saving memories...');
+
+      // Create a text file from memories
+      const memoriesBlob = new Blob([memoriesText], { type: 'text/plain' });
+      const memoriesFile = new File([memoriesBlob], 'student_memories.txt', {
+        type: 'text/plain'
+      });
+
+      await uploadToRagStore(ragStoreName, memoriesFile);
+
+      setUploadProgress('');
+      setIsUploadingFile(false);
+      setMemoriesText(''); // Clear the text area
+      setChatHistory([]); // Reset chat history
+      alert('Memories saved as study material! Chat has been reset to apply the new context.');
+    } catch (error) {
+      console.error('Failed to save memories:', error);
+      setUploadProgress('');
+      setIsUploadingFile(false);
+      alert(`Failed to save memories: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -194,28 +218,6 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
-      {/* Sidebar for Memories */}
-      <div className={`flex flex-col bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ${showMemories ? 'w-1/3' : 'w-12'}`}>
-        <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between">
-            <h2 className={`font-bold text-lg text-gray-900 dark:text-white transition-opacity ${showMemories ? 'opacity-100' : 'opacity-0'}`}>Student Memories</h2>
-            <button onClick={() => setShowMemories(!showMemories)} className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
-                 {showMemories ? '<<' : '>>'}
-            </button>
-        </div>
-        <div className={`p-4 flex-grow flex flex-col overflow-hidden ${!showMemories && 'hidden'}`}>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Paste survey answers, quiz results, and course notes here. This provides context for the tutorbot.</p>
-          <textarea
-            value={tempMemories}
-            onChange={(e) => setTempMemories(e.target.value)}
-            className="w-full flex-grow p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Example:&#10;Survey Q1: I'm new to programming.&#10;Quiz 1 Score: 65% - Struggled with loops."
-          />
-          <button onClick={handleSaveMemories} className="mt-4 w-full py-2 px-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
-            Save Memories & Reset Chat
-          </button>
-        </div>
-      </div>
-      
       {/* Main Chat Area */}
       <div className="flex flex-col flex-grow">
         <header className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b dark:border-gray-700 shadow-sm">
@@ -297,7 +299,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
 
           <div className="p-4 flex-grow flex flex-col overflow-auto">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Upload course materials (PDFs, documents) for AI to reference when answering questions.
+              Upload course materials AND student memories. Everything is searchable by the AI.
             </p>
 
             {/* Create Store Section */}
@@ -314,10 +316,34 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
               </div>
             )}
 
+            {/* Student Memories Section */}
+            {ragStoreName && (
+              <div className="mb-6">
+                <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">📝 Student Memories</h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                  Survey answers, quiz results, learning struggles, strengths, etc.
+                </p>
+                <textarea
+                  value={memoriesText}
+                  onChange={(e) => setMemoriesText(e.target.value)}
+                  className="w-full h-32 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  placeholder="Example:&#10;Survey Q1: I'm new to programming.&#10;Quiz 1 Score: 65% - Struggled with loops.&#10;Strengths: Good at understanding concepts."
+                  disabled={isUploadingFile}
+                />
+                <button
+                  onClick={handleSaveMemories}
+                  className="mt-2 w-full py-2 px-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400"
+                  disabled={isUploadingFile || !memoriesText.trim()}
+                >
+                  💾 Save Memories as File
+                </button>
+              </div>
+            )}
+
             {/* Upload Files Section */}
             {ragStoreName && (
               <div className="mb-6">
-                <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">Upload Files</h3>
+                <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">📚 Upload Course Materials</h3>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -372,7 +398,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
             {/* Info Box */}
             <div className="mt-auto p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <p className="text-xs text-gray-700 dark:text-gray-300">
-                💡 <strong>How it works:</strong> Upload study materials here. When you ask questions, the AI will search these materials AND use your student memories to provide personalized, accurate answers.
+                💡 <strong>How it works:</strong> Everything here (memories + materials) is saved as files and searchable. When you ask questions, the AI searches ALL uploaded content to provide personalized, accurate answers with citations.
               </p>
             </div>
           </div>
