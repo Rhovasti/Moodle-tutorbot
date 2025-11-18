@@ -9,6 +9,7 @@ import { connectDatabase } from './database/connection';
 import { logger } from './utils/logger';
 import chatRouter from './api/chat';
 import memoriesRouter from './api/memories';
+import moodleContextRouter from './api/moodle-context';
 import { errorHandler } from './middleware/errorHandler';
 
 // Load environment variables
@@ -31,13 +32,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // API routes (protected by LTI authentication)
 app.use('/api/chat', chatRouter);
 app.use('/api/memories', memoriesRouter);
+app.use('/api/moodle-context', moodleContextRouter);
 
 // Serve frontend static files in production
 if (process.env.NODE_ENV === 'production') {
@@ -63,7 +65,7 @@ async function startServer() {
     logger.info('Database connected successfully');
 
     // Setup LTI provider
-    const ltiProvider = await setupLTI(app);
+    await setupLTI(app);
     logger.info('LTI Provider initialized successfully');
 
     // Start server
