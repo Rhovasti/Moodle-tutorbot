@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { Chat } from '@google/genai';
 import useLocalStorage from '../hooks/useLocalStorage';
-import { startChat, enrichMessageWithRAG, createRagStore, uploadToRagStore, listRagStores } from '../services/geminiService';
+import { startChat, enrichMessageWithRAG, createRagStore, uploadToRagStore, listRagStores, getRagStoreInfo } from '../services/geminiService';
 import type { User, ChatMessage, RagStore } from '../types';
 import { MessageAuthor } from '../types';
+import UserContext from './UserContext';
 
 interface ChatbotProps {
   user: User;
@@ -31,9 +32,11 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showMaterials, setShowMaterials] = useState(false);
+  const [showProgress, setShowProgress] = useState(true); // Show progress by default
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>('');
   const [availableStores, setAvailableStores] = useState<RagStore[]>([]);
+  const [storeInfo, setStoreInfo] = useState<any>(null);
 
   const chatRef = useRef<Chat | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -62,6 +65,25 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
     };
     loadStores();
   }, []);
+
+  // Load store info when ragStoreName changes
+  useEffect(() => {
+    const loadStoreInfo = async () => {
+      if (!ragStoreName) {
+        setStoreInfo(null);
+        return;
+      }
+
+      try {
+        const info = await getRagStoreInfo(ragStoreName);
+        setStoreInfo(info);
+      } catch (error) {
+        console.error('Failed to load store info:', error);
+        setStoreInfo(null);
+      }
+    };
+    loadStoreInfo();
+  }, [ragStoreName]);
 
   const handleCreateStore = async () => {
     const storeName = prompt('Enter a name for your study materials collection:');
@@ -229,6 +251,12 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
                   </span>
                 )}
                 <button
+                  onClick={() => setShowProgress(!showProgress)}
+                  className="py-2 px-4 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 transition"
+                >
+                  📊 Learning Progress
+                </button>
+                <button
                   onClick={() => setShowMaterials(!showMaterials)}
                   className="py-2 px-4 bg-purple-500 text-white rounded-lg text-sm font-semibold hover:bg-purple-600 transition"
                 >
@@ -283,6 +311,24 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
           </form>
         </footer>
       </div>
+
+      {/* Learning Progress Sidebar */}
+      {showProgress && (
+        <div className="w-96 bg-white dark:bg-gray-800 shadow-lg border-l dark:border-gray-700 flex flex-col overflow-hidden">
+          <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between">
+            <h2 className="font-bold text-lg text-gray-900 dark:text-white">Learning Progress</h2>
+            <button
+              onClick={() => setShowProgress(false)}
+              className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="p-4 flex-grow overflow-auto">
+            <UserContext user={user} courseId={1} />
+          </div>
+        </div>
+      )}
 
       {/* Study Materials Sidebar */}
       {showMaterials && (
@@ -391,6 +437,60 @@ const Chatbot: React.FC<ChatbotProps> = ({ user, onLogout }) => {
                       </p>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Store File Information */}
+            {ragStoreName && storeInfo && (
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">📁 Uploaded Files</h3>
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">Collection:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {storeInfo.displayName || 'Unnamed'}
+                      </span>
+                    </div>
+                    {storeInfo.createTime && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">Created:</span>
+                        <span className="text-gray-900 dark:text-white">
+                          {new Date(storeInfo.createTime).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {storeInfo.updateTime && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">Last Updated:</span>
+                        <span className="text-gray-900 dark:text-white">
+                          {new Date(storeInfo.updateTime).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+                    {storeInfo.fileCount !== undefined && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">Files:</span>
+                        <span className="font-semibold text-green-600 dark:text-green-400">
+                          {storeInfo.fileCount} file{storeInfo.fileCount !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    )}
+                    {storeInfo.vectorDatabaseSizeBytes !== undefined && (
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600 dark:text-gray-400">Storage:</span>
+                        <span className="text-gray-900 dark:text-white">
+                          {(storeInfo.vectorDatabaseSizeBytes / 1024 / 1024).toFixed(2)} MB
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {storeInfo.fileCount === 0 && (
+                    <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                      ⚠️ No files uploaded yet. Upload memories or course materials above.
+                    </p>
+                  )}
                 </div>
               </div>
             )}
