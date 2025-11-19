@@ -1,13 +1,13 @@
-import { Application } from 'express';
+import { Application, Request, Response, NextFunction } from 'express';
 import lti from 'ltijs';
-import { Provider } from 'ltijs';
+import { Provider, LTIToken } from 'ltijs';
 import path from 'path';
 import { logger } from '../utils/logger';
 import User from '../models/User';
 
 const { LTI_KEY, MONGODB_URI, LTI_URL, NODE_ENV } = process.env;
 
-export async function setupLTI(app: Application): Promise<Provider> {
+export async function setupLTI(_app: Application): Promise<Provider> {
   // Configure LTI provider
   lti.setup(
     LTI_KEY || 'LTIKEY',
@@ -40,19 +40,19 @@ export async function setupLTI(app: Application): Promise<Provider> {
   );
 
   // Register LTI launch handler
-  lti.onConnect(async (token, req, res, next) => {
+  lti.onConnect(async (token: LTIToken, req: Request, res: Response, _next: NextFunction) => {
     try {
       logger.info('LTI Launch received');
 
       // Extract user information from LTI token
       const userInfo = {
         ltiUserId: token.user,
-        name: token.userInfo.name || 'Anonymous',
-        email: token.userInfo.email || '',
-        roles: token.userInfo.roles || [],
-        contextId: token.platformContext.context.id,
-        contextLabel: token.platformContext.context.label,
-        contextTitle: token.platformContext.context.title,
+        name: token.userInfo?.name || 'Anonymous',
+        email: token.userInfo?.email || '',
+        roles: token.userInfo?.roles || [],
+        contextId: token.platformContext?.context?.id || '',
+        contextLabel: token.platformContext?.context?.label || '',
+        contextTitle: token.platformContext?.context?.title || '',
         platformId: token.platformId,
         clientId: token.clientId
       };
@@ -97,7 +97,7 @@ export async function setupLTI(app: Application): Promise<Provider> {
 
       // Store user ID in session for API authentication
       if (req.session) {
-        req.session.userId = user._id.toString();
+        req.session.userId = String(user._id);
         req.session.ltiUserId = userInfo.ltiUserId;
         req.session.contextId = userInfo.contextId;
         req.session.platformId = userInfo.platformId;
@@ -112,7 +112,7 @@ export async function setupLTI(app: Application): Promise<Provider> {
   });
 
   // Register Deep Linking handler (for content selection)
-  lti.onDeepLinking(async (token, req, res) => {
+  lti.onDeepLinking(async (token: LTIToken, _req: Request, res: Response) => {
     try {
       logger.info('Deep Linking request received');
 
@@ -141,23 +141,11 @@ export async function setupLTI(app: Application): Promise<Provider> {
     }
   });
 
-  // Register Names and Role Provisioning Service handler
-  lti.onGetMembers(async (token, req, res) => {
-    try {
-      logger.info('Names and Role Provisioning Service request');
-
-      // Get members from the course context
-      const members = await lti.NamesAndRoles.getMembers(token);
-
-      return res.json(members);
-    } catch (error) {
-      logger.error('Error in NRPS handler:', error);
-      return res.status(500).send('Error fetching course members');
-    }
-  });
+  // Note: Names and Role Provisioning Service (onGetMembers) is not available in ltijs v5.9.7
+  // If needed, this functionality can be accessed via lti.NamesAndRoles.getMembers() directly
 
   // Configure dynamic registration
-  lti.onDynamicRegistration(async (req, res) => {
+  lti.onDynamicRegistration(async (_req: Request, res: Response) => {
     try {
       logger.info('Dynamic registration request received');
 

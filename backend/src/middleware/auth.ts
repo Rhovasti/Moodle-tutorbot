@@ -10,12 +10,6 @@ declare global {
       contextId?: string;
       platformId?: string;
     }
-    interface Session {
-      userId?: string;
-      ltiUserId?: string;
-      contextId?: string;
-      platformId?: string;
-    }
   }
 }
 
